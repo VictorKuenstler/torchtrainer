@@ -1,5 +1,5 @@
 from tests.fixtures import Net
-from torchtrainer.callbacks.EarlyStopping import EarlyStoppingEpoch, EarlyStoppingIteration
+from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch, EarlyStoppingIteration
 from torchtrainer.modules.trainer import TorchTrainer
 
 
@@ -49,4 +49,3 @@ def test_early_stopping_iteration():
         early_stopping.on_iteration(i, {'loss': i})
 
     assert trainer.stop_training == False
-
