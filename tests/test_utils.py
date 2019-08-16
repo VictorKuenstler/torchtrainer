@@ -1,13 +1,36 @@
+import pytest
+from torch import nn, optim
 from torch.utils.data.dataloader import DataLoader
 from torchvision.datasets import FakeData
 
-from torchtrainer.modules.utils import _check_loader
+from tests.fixtures import Net
+from torchtrainer.modules.utils import check_loader, check_loss, check_optimizer
 
 
 def test_check_loader():
     dataset = FakeData()
     data_loader = DataLoader(dataset)
 
-    assert _check_loader(data_loader) == True
+    check_loader(data_loader)
 
-    assert _check_loader('') == False
+    with pytest.raises(TypeError):
+        check_loader(None)
+
+
+def test_check_loss():
+    loss = nn.BCELoss()
+
+    check_loss(loss)
+
+    with pytest.raises(TypeError):
+        check_loader(None)
+
+
+def test_check_optimizer():
+    model = Net()
+    optimizer = optim.Adam(model.parameters())
+
+    check_optimizer(optimizer)
+
+    with pytest.raises(TypeError):
+        check_loader(None)
