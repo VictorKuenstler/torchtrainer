@@ -1,3 +1,10 @@
 
 \.idea/
 \.venv/
+tests/__pycache__/
+
+torchtrainer/__pycache__/
+
+torchtrainer/callbacks/__pycache__/
+
+*.pyc

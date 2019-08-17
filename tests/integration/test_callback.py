@@ -5,6 +5,7 @@ from tests.integration.utils import check_file_exists, remove_file, get_num_line
     get_num_files_in_directory
 from torchtrainer.callbacks.checkpoint import Checkpoint, CheckpointIteration
 from torchtrainer.callbacks.csv_logger import CSVLogger, CSVLoggerIteration
+from torchtrainer.callbacks.progressbar import ProgressBar
 from torchtrainer.metrics.binary_accuracy import BinaryAccuracy
 from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch, EarlyStoppingIteration
 from torchtrainer.modules.trainer import TorchTrainer
@@ -189,3 +190,25 @@ def test_checkpointing(fake_loader, simple_neural_net):
 
     delete_folder(directory)
 
+
+def test_progressbar(fake_loader, simple_neural_net):
+    train_loader = fake_loader
+    val_loader = fake_loader
+
+    loss = nn.BCELoss()
+    optimizer = SGD(simple_neural_net.parameters(), lr=0.001, momentum=0.9)
+
+    callbacks = [ProgressBar(log_every=1)]
+
+    trainer = TorchTrainer(simple_neural_net)
+    trainer.prepare(optimizer,
+                    loss,
+                    train_loader,
+                    val_loader,
+                    transform_fn=transform_fn,
+                    validate_every=1,
+                    callbacks=callbacks)
+
+    epochs = 4
+    batch_size = 4
+    trainer.train(epochs, batch_size)

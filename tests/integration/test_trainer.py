@@ -18,7 +18,7 @@ def test_trainer_train_without_plugins(fake_loader, simple_neural_net):
     optimizer = SGD(simple_neural_net.parameters(), lr=0.001, momentum=0.9)
 
     trainer = TorchTrainer(simple_neural_net)
-    trainer.prepare(optimizer, loss, train_loader, val_loader, transform_fn=transform_fn, validate_every=1)
+    trainer.prepare(optimizer, loss, train_loader, val_loader, transform_fn=transform_fn)
     trainer.train(1, 4)
 
 

@@ -5,6 +5,7 @@ class CallbackContainer:
     """
     Container holding all the callbacks
     """
+
     def __init__(self, callbacks=None, trainer=None):
         callbacks = callbacks or []
 
@@ -39,15 +40,20 @@ class CallbackContainer:
         for callback in self.callbacks:
             callback.on_batch_end(iteration, logs)
 
-    def on_validation_begin(self, epoch, logs=None):
+    def on_validation_begin(self, logs=None):
         logs = logs or {}
         for callback in self.callbacks:
-            callback.on_validation_begin(epoch, logs)
+            callback.on_validation_begin(logs)
 
-    def on_validation_end(self, epoch, logs=None):
+    def on_validation_end(self, logs=None):
         logs = logs or {}
         for callback in self.callbacks:
-            callback.on_validation_begin(epoch, logs)
+            callback.on_validation_end(logs)
+
+    def on_validation_epoch_begin(self, logs=None):
+        logs = logs or {}
+        for callback in self.callbacks:
+            callback.on_validation_epoch_begin(logs)
 
     def on_train_begin(self, logs=None):
         logs = logs or {}

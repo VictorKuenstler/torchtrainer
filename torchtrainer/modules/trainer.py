@@ -125,7 +125,8 @@ class TorchTrainer:
 
         container.on_train_begin({
             'batch_size': self._batch_size,
-            'num_batches': len(self._train_loader)
+            'num_batches': len(self._train_loader),
+            'val_num_batches': len(self._val_loader),
         })
 
         # running loss
@@ -138,7 +139,7 @@ class TorchTrainer:
 
             for batch_idx, batch in enumerate(self._train_loader):
                 batch_logs = {}
-                container.on_epoch_begin(self._iterations, batch_logs)
+                container.on_batch_begin(self._iterations, batch_logs)
 
                 # =================
                 y_pred, y_true, loss = self.train_loop(batch)
@@ -162,7 +163,7 @@ class TorchTrainer:
                 epoch_logs.update(batch_logs)
             final_result.update(epoch_logs)
             self._epoch_end()
-            container.on_epoch_end(epoch, epoch_logs)
+            container.on_epoch_end(epoch, final_result)
             losses.reset()
             if self.stop_training:
                 break
@@ -178,9 +179,14 @@ class TorchTrainer:
         metrics = MetricContainer(self._val_metrics)
         metrics.restart()
 
+        container = CallbackContainer(self._callbacks)
+
         losses = AverageMeter('loss')
         validation_logs = {}
+
+        container.on_validation_begin()
         for batch_idx, batch in enumerate(self._val_loader):
+            container.on_validation_epoch_begin()
             batch_logs = {}
             y_pred, y_true, loss = self.val_loop(batch)
 
@@ -194,6 +200,8 @@ class TorchTrainer:
         out_val_logs = {}
         for key, item in validation_logs.items():
             out_val_logs['val_' + key] = item
+
+        container.on_validation_end(out_val_logs)
         return out_val_logs
 
     def _set_loss(self, loss):
