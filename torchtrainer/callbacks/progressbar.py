@@ -46,7 +46,7 @@ class ProgressBar(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         logs['iteration'] = 00
-        logs['epoch'] = epoch
+        logs['epoch'] = epoch + 1
         keys, items = convert_logs(logs)
 
         if not self.has_header:
@@ -61,7 +61,7 @@ class ProgressBar(Callback):
 
     def on_batch_end(self, iteration, logs=None):
         if iteration % self.log_every == 0:
-            logs['iteration'] = iteration
+            logs['iteration'] = iteration + 1
             keys, items = convert_logs(logs)
 
             if not self.has_header:
