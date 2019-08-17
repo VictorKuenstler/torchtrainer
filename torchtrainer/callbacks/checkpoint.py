@@ -8,11 +8,11 @@ from torchtrainer.callbacks.callbacks import Callback
 
 
 class Checkpoint(Callback):
-    def __init__(self, directory, filename='snapshot', monitor='val_loss', best_only=False):
+    def __init__(self, directory, filename='snapshot', best_filename='best', monitor='val_loss'):
         self.directory = directory
         self.filename = filename
         self.monitor = monitor
-        self.best_only = best_only
+        self.best_filename = best_filename
         self.best = float('inf')
 
         super(Checkpoint, self).__init__()
@@ -25,26 +25,82 @@ class Checkpoint(Callback):
         }, file)
 
         if is_best:
-            shutil.copyfile(file, 'model_best.pt')
+            shutil.copyfile(file, file.replace(self.filename, self.best_filename))
 
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
-        values = ''
+        values = f'epoch_{epoch + 1}_'
         for key, item in logs.items():
-            values += f'{key}_{item}_'
-
-        snapshot_prefix = os.path.join(self.directory, self.filename)
-        snapshot_path = snapshot_prefix + values + '.pt'
-        if self.best_only:
-            current = logs.get(self.monitor)
-            if current is None:
-                pass
+            if isinstance(item, int):
+                values += f'{key}_{item}_'
             else:
-                if current < self.best:
-                    self.best = current
-                    self.save(epoch, snapshot_path, True)
+                values += f'{key}_{"{:.2f}".format(item)}_'
+
+        snapshot_prefix = os.path.join(self.directory, self.filename + '_')
+        snapshot_path = snapshot_prefix + values + '.pt'
+
+        current = logs.get(self.monitor)
+
+        if current is None:
+            pass
+        elif current < self.best:
+            self.best = current
+            for f in glob.glob(os.path.join(self.directory, self.best_filename) + '*'):
+                if f != snapshot_path:
+                    os.remove(f)
+            self.save(epoch, snapshot_path, True)
         else:
             self.save(epoch, snapshot_path)
+
+        for f in glob.glob(snapshot_prefix + '*'):
+            if f != snapshot_path:
+                os.remove(f)
+
+
+class CheckpointIteration(Callback):
+    def __init__(self, directory, filename='snapshot', best_filename='best', monitor='val_loss'):
+        self.directory = directory
+        self.filename = filename
+        self.best_filename = best_filename
+        self.monitor = monitor
+        self.best = float('inf')
+
+        super(CheckpointIteration, self).__init__()
+
+    def save(self, iteration, file, is_best=False):
+        torch.save({
+            'iteration': iteration + 1,
+            'state_dict': self.trainer.model.state_dict(),
+            'optimizer': self.trainer._optimizer.state_dict()
+        }, file)
+
+        if is_best:
+            shutil.copyfile(file, file.replace(self.filename, self.best_filename))
+
+    def on_iteration(self, iteration, logs=None):
+        logs = logs or {}
+        values = f'epoch_{iteration + 1}_'
+        for key, item in logs.items():
+            if isinstance(item, int):
+                values += f'{key}_{item}_'
+            else:
+                values += f'{key}_{"{:.2f}".format(item)}_'
+
+        snapshot_prefix = os.path.join(self.directory, self.filename + '_')
+        snapshot_path = snapshot_prefix + values + '.pt'
+
+        current = logs.get(self.monitor)
+
+        if current is None:
+            pass
+        elif current < self.best:
+            self.best = current
+            for f in glob.glob(os.path.join(self.directory, self.best_filename) + '*'):
+                if f != snapshot_path:
+                    os.remove(f)
+            self.save(iteration, snapshot_path, True)
+        else:
+            self.save(iteration, snapshot_path)
 
         for f in glob.glob(snapshot_prefix + '*'):
             if f != snapshot_path:
