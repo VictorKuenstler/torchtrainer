@@ -63,8 +63,6 @@ class CallbackContainer:
 
     def on_train_end(self, logs=None):
         logs = logs or {}
-        logs['final_loss'] = self.trainer.history.epoch_losses[-1],
-        logs['best_loss'] = min(self.trainer.history.epoch_losses),
         logs['stop_time'] = current_time()
         for callback in self.callbacks:
             callback.on_train_end(logs)

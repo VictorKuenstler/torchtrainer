@@ -161,12 +161,13 @@ class TorchTrainer:
 
                 container.on_batch_end(self._iterations, batch_logs)
                 epoch_logs.update(batch_logs)
+            epoch_logs.update(self._epoch_end())
             final_result.update(epoch_logs)
-            self._epoch_end()
-            container.on_epoch_end(epoch, final_result)
+            container.on_epoch_end(epoch, epoch_logs)
             losses.reset()
             if self.stop_training:
                 break
+        container.on_train_end(final_result)
         return final_result
 
     def val(self):
@@ -251,4 +252,6 @@ class TorchTrainer:
         :return:
         """
         if self._validate_every is None:
-            self.val()
+            return self.val()
+        else:
+            return {}
