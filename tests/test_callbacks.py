@@ -1,10 +1,9 @@
-from tests.fixtures import Net
 from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch, EarlyStoppingIteration
 from torchtrainer.modules.trainer import TorchTrainer
 
 
-def test_early_stopping_epoch():
-    trainer = TorchTrainer(Net())
+def test_early_stopping_epoch(simple_neural_net):
+    trainer = TorchTrainer(simple_neural_net)
 
     patience = 5
 
@@ -16,7 +15,7 @@ def test_early_stopping_epoch():
 
     assert trainer.stop_training == True
 
-    trainer = TorchTrainer(Net())
+    trainer = TorchTrainer(simple_neural_net)
 
     early_stopping = EarlyStoppingEpoch('loss', min_delta=0.1, patience=patience)
     early_stopping.set_trainer(trainer)
@@ -27,8 +26,8 @@ def test_early_stopping_epoch():
     assert trainer.stop_training == False
 
 
-def test_early_stopping_iteration():
-    trainer = TorchTrainer(Net())
+def test_early_stopping_iteration(simple_neural_net):
+    trainer = TorchTrainer(simple_neural_net)
 
     patience = 5
 
@@ -40,7 +39,7 @@ def test_early_stopping_iteration():
 
     assert trainer.stop_training == True
 
-    trainer = TorchTrainer(Net())
+    trainer = TorchTrainer(simple_neural_net)
 
     early_stopping = EarlyStoppingIteration('loss', min_delta=0.1, patience=patience)
     early_stopping.set_trainer(trainer)

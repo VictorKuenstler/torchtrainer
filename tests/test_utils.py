@@ -3,7 +3,6 @@ from torch import nn, optim
 from torch.utils.data.dataloader import DataLoader
 from torchvision.datasets import FakeData
 
-from tests.fixtures import Net
 from torchtrainer.modules.utils import check_loader, check_loss, check_optimizer
 
 
@@ -26,9 +25,8 @@ def test_check_loss():
         check_loader(None)
 
 
-def test_check_optimizer():
-    model = Net()
-    optimizer = optim.Adam(model.parameters())
+def test_check_optimizer(simple_neural_net):
+    optimizer = optim.Adam(simple_neural_net.parameters())
 
     check_optimizer(optimizer)
 

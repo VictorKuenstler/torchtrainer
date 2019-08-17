@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 from torchtrainer.average_meter import AverageMeter
 from torchtrainer.callbacks.callback_container import CallbackContainer
@@ -33,33 +34,31 @@ class TorchTrainer:
 
         self.transform_fn = None
 
-    def set_loss(self, loss):
-        self._loss = loss
+    def prepare(self, optimizer, loss, train_loader, val_loader, transform_fn=None, callbacks=None, metrics=None,
+                validate_every=None):
+        """
+        Prepare the trainer
+        :param optimizer: Optimization algorithm of your choice
+        :param loss: Loss funciton of your choice
+        :param train_loader: L
+        :param val_loader:
+        :param transform_fn: Function to transform batch into (*inputs, y_true) where inputs is tuple of inputs passed
+        into your forward pass
+        :param callbacks: List of callbacks
+        :param metrics: List of metrics to log
+        :param validate_every: Whether and when you want validate after x iteration (number of batches processed)
+        :return:
+        """
+        self._set_optimzer(optimizer)
+        self._set_loss(loss)
 
-    def set_optimzer(self, optimizer, **kwargs):
-        if 'parameters' in kwargs:
-            parameters = kwargs['parameters']
-        else:
-            parameters = self.model.parameters()
-
-        self._optimizer = optimizer(parameters, **kwargs)
-
-    def set_train_loader(self, train_loader):
-        self._train_loader = train_loader
-
-    def set_validation(self, val_loader, validate_every=None):
-        self._val_loader = val_loader
-        self._validate_every = validate_every
-
-    def prepare(self, optimizer, loss, train_loader, val_loader, callbacks=None, metrics=None, validate_every=None):
-        self.set_optimzer(optimizer)
-        self.set_loss(loss)
-
-        self.set_train_loader(train_loader)
-        self.set_validation(val_loader, validate_every)
+        self._set_train_loader(train_loader)
+        self._set_validation(val_loader, validate_every)
 
         self._callbacks = callbacks
         self._metrics = metrics
+
+        self._set_transform_fn(transform_fn)
 
     def train_loop(self, batch):
         """
@@ -179,19 +178,56 @@ class TorchTrainer:
             out_val_logs['val' + key] = item
         return validation_logs
 
+    def _set_loss(self, loss):
+        self._loss = loss
+
+    def _set_optimzer(self, optimizer, **kwargs):
+        if 'parameters' in kwargs:
+            parameters = kwargs['parameters']
+        else:
+            parameters = self.model.parameters()
+
+        self._optimizer = optimizer(parameters, **kwargs)
+
+    def _set_train_loader(self, train_loader):
+        self._train_loader = train_loader
+
+    def _set_validation(self, val_loader, validate_every=None):
+        self._val_loader = val_loader
+        self._validate_every = validate_every
+
+    def _set_transform_fn(self, fn):
+        self.transform_fn = fn
+
     def _reset(self):
+        """
+        Resets the trainer for further training
+        :return:
+        """
         self._iterations = 0
 
     def _check(self):
+        """
+        Checks inputs to be correct for training
+        :return:
+        """
         check_loss(self._loss)
         check_optimizer(self._optimizer)
         check_loader(self._train_loader)
 
     def _iteration_end_val(self):
+        """
+        Checks whether validate_every is reached
+        :return: boolean
+        """
         self._iterations += 1
-        if self._iterations % self._validate_every == 0:
+        if self._validate_every is not None and self._iterations % self._validate_every == 0:
             return True
 
     def _epoch_end(self):
+        """
+        Called after epoch end reached
+        :return:
+        """
         if self._validate_every is None:
             self.val()
