@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import torch.nn as nn
 import torch
 
@@ -21,6 +23,7 @@ class TorchTrainer:
 
         self._callbacks = []
         self._metrics = []
+        self._val_metrics = []
 
         self._loss = None
         self._optimizer = None
@@ -33,8 +36,9 @@ class TorchTrainer:
         self.stop_training = False
 
         self.transform_fn = None
+        self._batch_size = None
 
-    def prepare(self, optimizer, loss, train_loader, val_loader, transform_fn=None, callbacks=None, metrics=None,
+    def prepare(self, optimizer, loss, train_loader, val_loader, transform_fn=None, callbacks=[], metrics=[],
                 validate_every=None):
         """
         Prepare the trainer
@@ -42,7 +46,8 @@ class TorchTrainer:
         :param loss: Loss funciton of your choice
         :param train_loader: L
         :param val_loader:
-        :param transform_fn: Function to transform batch into (*inputs, y_true) where inputs is tuple of inputs passed
+        :param transform_fn: Function to transform batch into (*inputs, y_true) where inputs is tuple of inputs passed or
+        (input_tensor, y_true)
         into your forward pass
         :param callbacks: List of callbacks
         :param metrics: List of metrics to log
@@ -57,6 +62,7 @@ class TorchTrainer:
 
         self._callbacks = callbacks
         self._metrics = metrics
+        self._val_metrics = deepcopy(metrics)
 
         self._set_transform_fn(transform_fn)
 
@@ -68,7 +74,12 @@ class TorchTrainer:
         """
         self._optimizer.zero_grad()
         inputs, y_true = self.transform_fn(batch)
-        y_pred = self.model(*inputs)
+
+        y_pred = None
+        if isinstance(inputs, torch.Tensor):
+            y_pred = self.model(inputs)
+        else:
+            y_pred = self.model(*inputs)
 
         loss = self._loss(y_pred, y_true)
         loss.backward()
@@ -84,7 +95,12 @@ class TorchTrainer:
         :return: y_pred: the predicted values, y_true: the true values, loss: the loss
         """
         inputs, y_true = self.transform_fn(batch)
-        y_pred = self.model(*inputs)
+
+        y_pred = None
+        if isinstance(inputs, torch.Tensor):
+            y_pred = self.model(inputs)
+        else:
+            y_pred = self.model(*inputs)
 
         loss = self._loss(y_pred, y_true)
         return y_pred, y_true, loss
@@ -98,7 +114,7 @@ class TorchTrainer:
         """
         self._check()
         self._reset()
-
+        self._batch_size = batch_size
         self.model.train()
 
         metrics = MetricContainer(self._metrics)
@@ -108,18 +124,19 @@ class TorchTrainer:
         container.set_trainer(self)
 
         container.on_train_begin({
-            'batch_size': batch_size,
-            'num_batches': len(self.train_loader)
+            'batch_size': self._batch_size,
+            'num_batches': len(self._train_loader)
         })
 
         # running loss
         losses = AverageMeter('loss')
+        final_result = {}
 
         for epoch in range(epochs):
             epoch_logs = {}
             container.on_epoch_begin(epoch, epoch_logs)
 
-            for batch_idx, batch in enumerate(self.train_loader):
+            for batch_idx, batch in enumerate(self._train_loader):
                 batch_logs = {}
                 container.on_epoch_begin(self._iterations, batch_logs)
 
@@ -127,7 +144,7 @@ class TorchTrainer:
                 y_pred, y_true, loss = self.train_loop(batch)
                 # =================
 
-                losses.update(loss.item(), batch_size)
+                losses.update(loss.item(), self._batch_size)
 
                 batch_logs['loss'] = loss.item()
                 batch_logs['running_loss'] = losses.avg
@@ -143,13 +160,13 @@ class TorchTrainer:
 
                 container.on_batch_end(self._iterations, batch_logs)
                 epoch_logs.update(batch_logs)
-
+            final_result.update(epoch_logs)
             self._epoch_end()
             container.on_epoch_end(epoch, epoch_logs)
             losses.reset()
-
             if self.stop_training:
                 break
+        return final_result
 
     def val(self):
         """
@@ -158,7 +175,7 @@ class TorchTrainer:
         """
         self.model.eval()
         check_loader(self._val_loader)
-        metrics = MetricContainer(metric.copy() for metric in self._metrics)
+        metrics = MetricContainer(self._val_metrics)
         metrics.restart()
 
         losses = AverageMeter('loss')
@@ -166,7 +183,8 @@ class TorchTrainer:
         for batch_idx, batch in enumerate(self._val_loader):
             batch_logs = {}
             y_pred, y_true, loss = self.val_loop(batch)
-            metrics(y_pred, y_true)
+
+            losses.update(loss.item(), self._batch_size)
             batch_logs['loss'] = loss.item()
             batch_logs['running_loss'] = losses.avg
             batch_logs.update(metrics(y_pred, y_true))
@@ -175,19 +193,14 @@ class TorchTrainer:
 
         out_val_logs = {}
         for key, item in validation_logs.items():
-            out_val_logs['val' + key] = item
-        return validation_logs
+            out_val_logs['val_' + key] = item
+        return out_val_logs
 
     def _set_loss(self, loss):
         self._loss = loss
 
-    def _set_optimzer(self, optimizer, **kwargs):
-        if 'parameters' in kwargs:
-            parameters = kwargs['parameters']
-        else:
-            parameters = self.model.parameters()
-
-        self._optimizer = optimizer(parameters, **kwargs)
+    def _set_optimzer(self, optimizer):
+        self._optimizer = optimizer
 
     def _set_train_loader(self, train_loader):
         self._train_loader = train_loader

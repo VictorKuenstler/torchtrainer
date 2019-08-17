@@ -1,6 +1,11 @@
 import pytest
+import torch
+import torchvision
 from torch import nn
 import torch.nn.functional as F
+from torch.utils.data.dataloader import DataLoader
+from torchvision.datasets import FakeData
+import torchvision.transforms as transforms
 
 
 @pytest.fixture
@@ -8,20 +13,39 @@ def simple_neural_net():
     return Net()
 
 
+@pytest.fixture
+def fake_data():
+    transform = transforms.Compose(
+        [transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    return FakeData(size=20, image_size=(3, 32, 32), transform=transform)
+
+
+@pytest.fixture
+def fake_loader():
+    transform = transforms.Compose(
+        [transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    return DataLoader(FakeData(size=20, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4, shuffle=True,
+                      num_workers=1)
+
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 20, 5, 1)
-        self.conv2 = nn.Conv2d(20, 50, 5, 1)
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 1)
+        self.fc4 = nn.Sigmoid()
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = x.view(-1, 4 * 4 * 50)
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return self.fc4(torch.squeeze(x, -1))

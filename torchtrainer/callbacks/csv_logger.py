@@ -3,10 +3,10 @@ import csv
 from torchtrainer.callbacks.callbacks import Callback
 
 
-class Logger(Callback):
+class CSVLogger(Callback):
     def __init__(self,
                  file):
-        super(Logger, self).__init__()
+        super(CSVLogger, self).__init__()
         self.file = file
         self.columns = None
         self.writer = None
@@ -32,10 +32,10 @@ class Logger(Callback):
         self.writer = None
 
 
-class LoggerIteration(Logger):
+class CSVLoggerIteration(CSVLogger):
     def __init__(self,
                  file):
-        super(LoggerIteration, self).__init__(file)
+        super(CSVLoggerIteration, self).__init__(file)
 
     def on_epoch_end(self, epoch, logs=None):
         pass
