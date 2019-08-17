@@ -39,6 +39,16 @@ class CallbackContainer:
         for callback in self.callbacks:
             callback.on_batch_end(iteration, logs)
 
+    def on_validation_begin(self, epoch, logs=None):
+        logs = logs or {}
+        for callback in self.callbacks:
+            callback.on_validation_begin(epoch, logs)
+
+    def on_validation_end(self, epoch, logs=None):
+        logs = logs or {}
+        for callback in self.callbacks:
+            callback.on_validation_begin(epoch, logs)
+
     def on_train_begin(self, logs=None):
         logs = logs or {}
         logs['start_time'] = current_time()

@@ -6,6 +6,12 @@ class EarlyStoppingEpoch(Callback):
                  monitor='val_loss',
                  min_delta=0,
                  patience=5):
+        """
+        EarlyStopping callback to stop the training called after every epoch
+        :param monitor: 'loss', 'val_loss', 'running_loss', 'running_val_loss', every metric you want
+        :param min_delta:
+        :param patience: integer
+        """
         self.monitor = monitor
         self.min_delta = min_delta
         self.patience = patience
@@ -42,7 +48,7 @@ class EarlyStoppingIteration(Callback):
                  patience=5):
         """
         EarlyStopping callback to stop the training after iteration_every
-        :param monitor: 'loss', 'val_loss', 'running_loss', 'running_val_loss', every metric
+        :param monitor: 'loss', 'val_loss', 'running_loss', 'running_val_loss', every metric you want
         :param min_delta:
         :param patience: integer
         """

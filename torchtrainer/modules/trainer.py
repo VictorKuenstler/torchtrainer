@@ -51,7 +51,7 @@ class TorchTrainer:
         self._val_loader = val_loader
         self._validate_every = validate_every
 
-    def compile(self, optimizer, loss, train_loader, val_loader, callbacks=None, metrics=None, validate_every=None):
+    def prepare(self, optimizer, loss, train_loader, val_loader, callbacks=None, metrics=None, validate_every=None):
         self.set_optimzer(optimizer)
         self.set_loss(loss)
 
@@ -132,16 +132,17 @@ class TorchTrainer:
 
                 batch_logs['loss'] = loss.item()
                 batch_logs['running_loss'] = losses.avg
+                batch_logs['iteration'] = self._iterations
                 batch_logs.update(metrics(y_pred, y_true))
 
-                container.on_batch_end(self._iterations, batch_logs)
-
                 if self._iteration_end_val():
-                    self.val()
+                    val_logs = self.val()
+                    batch_logs.update(val_logs)
                     container.on_iteration(self._iterations, batch_logs)
                     if self.stop_training:
                         break
 
+                container.on_batch_end(self._iterations, batch_logs)
                 epoch_logs.update(batch_logs)
 
             self._epoch_end()
@@ -158,11 +159,25 @@ class TorchTrainer:
         """
         self.model.eval()
         check_loader(self._val_loader)
-        metrics = MetricContainer(self._metrics)
+        metrics = MetricContainer(metric.copy() for metric in self._metrics)
+        metrics.restart()
 
+        losses = AverageMeter('loss')
+        validation_logs = {}
         for batch_idx, batch in enumerate(self._val_loader):
+            batch_logs = {}
             y_pred, y_true, loss = self.val_loop(batch)
             metrics(y_pred, y_true)
+            batch_logs['loss'] = loss.item()
+            batch_logs['running_loss'] = losses.avg
+            batch_logs.update(metrics(y_pred, y_true))
+
+            validation_logs.update(batch_logs)
+
+        out_val_logs = {}
+        for key, item in validation_logs.items():
+            out_val_logs['val' + key] = item
+        return validation_logs
 
     def _reset(self):
         self._iterations = 0

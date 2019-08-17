@@ -8,6 +8,7 @@ authors = ["Victor Künstler <victor.kuenstler@outlook.com>"]
 python = "^3.6"
 torch = "^1.2"
 torchvision = "^0.4.0"
+visdom = "^0.1.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.1"

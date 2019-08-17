@@ -34,3 +34,9 @@ class Callback(object):
 
     def on_iteration(self, iteration, logs=None):
         pass
+
+    def on_validation_begin(self, epoch, logs=None):
+        pass
+
+    def on_validation_end(self, epoch, logs=None):
+        pass
