@@ -1,4 +1,5 @@
 from torchtrainer.callbacks.callbacks import Callback
+from tqdm import tqdm
 
 
 class EarlyStoppingEpoch(Callback):
@@ -16,6 +17,8 @@ class EarlyStoppingEpoch(Callback):
         self.min_delta = min_delta
         self.patience = patience
 
+        self.history = []
+
         self.best_loss = float('inf')
         self.stopped_epoch = 0
         self.wait = 0
@@ -23,6 +26,8 @@ class EarlyStoppingEpoch(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         current_loss = logs.get(self.monitor)
+        self.history.append(current_loss)
+        self.history[-self.patience:]
 
         if current_loss is None:
             pass
@@ -38,7 +43,11 @@ class EarlyStoppingEpoch(Callback):
 
     def on_train_end(self, logs):
         if self.stopped_epoch > 0:
-            print(f'EarlyStopping terminated Training at Epoch {self.stopped_epoch}')
+            tqdm.write(
+                f'EarlyStopping terminated Training at Epoch {self.stopped_epoch} as {self.monitor} ' +
+                f'did not decrease by {self.min_delta} for over {self.patience} Epochs. ' +
+                f'History: {", ".join( ["{:.3f}".format(el) for el in self.history])}'
+            )
 
 
 class EarlyStoppingIteration(Callback):
@@ -56,7 +65,7 @@ class EarlyStoppingIteration(Callback):
         self.monitor = monitor
         self.min_delta = min_delta
         self.patience = patience
-
+        self.history = []
         self.best_loss = float('inf')
         self.stopped_iteration = 0
         self.wait = 0
@@ -65,6 +74,8 @@ class EarlyStoppingIteration(Callback):
     def on_iteration(self, iteration, logs=None):
         current_loss = logs.get(self.monitor)
         self.iteration += 1
+        self.history.append(current_loss)
+        self.history[-self.patience:]
 
         if current_loss is None:
             pass
@@ -80,4 +91,8 @@ class EarlyStoppingIteration(Callback):
 
     def on_train_end(self, logs):
         if self.stopped_iteration > 0:
-            print(f'EarlyStopping terminated Training at Epoch {self.stopped_iteration}')
+            tqdm.write(
+                f'EarlyStopping terminated Training at Epoch {self.stopped_iteration} as {self.monitor}' +
+                f'did not decrease by {self.min_delta} for over {self.patience} Epochs.' +
+                f'History: {", ".join( ["{:.3f}".format(el) for el in self.history])}'
+            )
