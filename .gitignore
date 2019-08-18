@@ -10,3 +10,5 @@ torchtrainer/callbacks/__pycache__/
 *.pyc
 
 dist/
+
+\.coverage
