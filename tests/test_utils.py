@@ -3,7 +3,7 @@ from torch import nn, optim
 from torch.utils.data.dataloader import DataLoader
 from torchvision.datasets import FakeData
 
-from torchtrainer.modules.utils import check_loader, check_loss, check_optimizer
+from torchtrainer.utils import check_loader, check_loss, check_optimizer
 
 
 def test_check_loader():

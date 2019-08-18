@@ -7,7 +7,7 @@ from torchtrainer.average_meter import AverageMeter
 from torchtrainer.callbacks.callback_container import CallbackContainer
 from torchtrainer.callbacks.metric_callback import MetricCallback
 from torchtrainer.metrics.metric_container import MetricContainer
-from torchtrainer.modules.utils import check_loss, check_optimizer, check_loader
+from torchtrainer.utils import check_loss, check_optimizer, check_loader
 
 
 class TorchTrainer:

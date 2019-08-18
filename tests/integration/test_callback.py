@@ -8,7 +8,7 @@ from torchtrainer.callbacks.csv_logger import CSVLogger, CSVLoggerIteration
 from torchtrainer.callbacks.progressbar import ProgressBar
 from torchtrainer.metrics.binary_accuracy import BinaryAccuracy
 from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch, EarlyStoppingIteration
-from torchtrainer.modules.trainer import TorchTrainer
+from torchtrainer.trainer import TorchTrainer
 
 
 def transform_fn(batch):
