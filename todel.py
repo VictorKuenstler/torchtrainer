@@ -1,8 +1,15 @@
 from torch import nn
 from torch.optim import SGD
+from torch.utils.data import DataLoader
+from torchvision.datasets import FakeData
+from torchvision.transforms import transforms
 
-from tests.fixtures import fake_loader, simple_neural_net
+from tests.fixtures import Net
+from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch
 from torchtrainer.callbacks.progressbar import ProgressBar
+from torchtrainer.callbacks.reducelronplateau import ReduceLROnPlateauCallback
+from torchtrainer.callbacks.visdom import VisdomEpoch, VisdomLinePlotter
+from torchtrainer.metrics.binary_accuracy import BinaryAccuracy
 from torchtrainer.modules.trainer import TorchTrainer
 
 
@@ -10,23 +17,46 @@ def transform_fn(batch):
     inputs, y_true = batch
     return inputs, y_true.float()
 
-train_loader = fake_loader()
-val_loader = fake_loader()
 
+metrics = [BinaryAccuracy()]
+
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+data_loader = DataLoader(FakeData(size=100, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4,
+                         shuffle=True,
+                         num_workers=1)
+train_loader = DataLoader(FakeData(size=100, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4,
+                          shuffle=True,
+                          num_workers=1)
+val_loader = DataLoader(FakeData(size=50, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4,
+                        shuffle=True,
+                        num_workers=1)
+
+model = Net()
 loss = nn.BCELoss()
-optimizer = SGD(simple_neural_net.parameters(), lr=0.001, momentum=0.9)
+optimizer = SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-callbacks = [ProgressBar(log_every=1)]
+plotter = VisdomLinePlotter(env_name=f'Model {11}')
 
-trainer = TorchTrainer(simple_neural_net())
+callbacks = [
+    ProgressBar(log_every=10),
+    VisdomEpoch(plotter, on_iteration_every=10),
+    VisdomEpoch(plotter, on_iteration_every=10, monitor='binary_acc'),
+    EarlyStoppingEpoch(min_delta=0.1, monitor='val_running_loss', patience=10),
+    # StepLREpochCallback(),
+    ReduceLROnPlateauCallback(factor=0.1, threshold=0.1, patience=2, verbose=True)
+]
+
+trainer = TorchTrainer(model)
 trainer.prepare(optimizer,
                 loss,
                 train_loader,
                 val_loader,
                 transform_fn=transform_fn,
-                validate_every=1,
-                callbacks=callbacks)
+                callbacks=callbacks,
+                metrics=metrics)
 
-epochs = 4
-batch_size = 4
+epochs = 100
+batch_size = 10
 trainer.train(epochs, batch_size)

@@ -1,8 +1,8 @@
 from torch import nn
 from torch.optim.sgd import SGD
 
-from tests.integration.utils import check_file_exists, remove_file, get_num_lines, create_test_directory, delete_folder, \
-    get_num_files_in_directory
+from tests.integration.utils import check_file_exists, remove_file, get_num_lines,\
+    create_test_directory, delete_folder, get_num_files_in_directory
 from torchtrainer.callbacks.checkpoint import Checkpoint, CheckpointIteration
 from torchtrainer.callbacks.csv_logger import CSVLogger, CSVLoggerIteration
 from torchtrainer.callbacks.progressbar import ProgressBar
@@ -92,7 +92,7 @@ def test_early_stopping_epoch(simple_neural_net):
     for i in range(patience + 2):
         early_stopping.on_epoch_end(i, {'loss': 1})
 
-    assert trainer.stop_training == True
+    assert trainer.stop_training
 
     trainer = TorchTrainer(simple_neural_net)
 
@@ -102,7 +102,7 @@ def test_early_stopping_epoch(simple_neural_net):
     for i in range(patience + 1):
         early_stopping.on_epoch_end(i, {'loss': i})
 
-    assert trainer.stop_training == False
+    assert not trainer.stop_training
 
 
 def test_early_stopping_iteration(simple_neural_net):
@@ -116,7 +116,7 @@ def test_early_stopping_iteration(simple_neural_net):
     for i in range(patience + 2):
         early_stopping.on_iteration(i, {'loss': 1})
 
-    assert trainer.stop_training == True
+    assert trainer.stop_training
 
     trainer = TorchTrainer(simple_neural_net)
 
@@ -126,7 +126,7 @@ def test_early_stopping_iteration(simple_neural_net):
     for i in range(patience + 1):
         early_stopping.on_iteration(i, {'loss': i})
 
-    assert trainer.stop_training == False
+    assert not trainer.stop_training
 
 
 def test_checkpointing(fake_loader, simple_neural_net):
@@ -160,7 +160,7 @@ def test_checkpointing(fake_loader, simple_neural_net):
     delete_folder(directory)
 
 
-def test_checkpointing(fake_loader, simple_neural_net):
+def test_checkpointing_iteration(fake_loader, simple_neural_net):
     train_loader = fake_loader
     val_loader = fake_loader
 

@@ -27,13 +27,12 @@ class VisdomEpoch(Callback):
         if self.iterations % self.on_iteration_every == 0:
             if logs is not None:
                 self.plotter.plot(var_name=self.monitor + 'iteration', split_name='train',
-                                  title_name=f'Iteration: {self.monitor}', x=self.iterations, y=logs[self.monitor], label='Iterations')
+                                  title_name=f'Iteration: {self.monitor}', x=self.iterations, y=logs[self.monitor],
+                                  label='Iterations')
 
 
 class VisdomLinePlotter:
-    """Plots to Visdom"""
-
-    def __init__(self, env_name='main'):
+    def __init__(self, env_name='model'):
         self.viz = Visdom()
         self.env = env_name
         self.plots = {}
@@ -49,10 +48,3 @@ class VisdomLinePlotter:
         else:
             self.viz.line(X=np.array([x]), Y=np.array([y]), env=self.env, win=self.plots[var_name], name=split_name,
                           update='append')
-
-    def plot_config(self, config):
-        inner_table = ''
-        for key, value in config.items():
-            inner_table += f'<tr><th>{key}</th><td>{value}</td></tr>'
-        config_html = f'<table border="1">{inner_table}</table>'
-        self.viz.text(config_html, env=self.env)

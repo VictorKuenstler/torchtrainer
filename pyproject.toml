@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchtrainer"
-version = "0.1.0"
+version = "0.1"
 description = ""
 authors = ["Victor Künstler <victor.kuenstler@outlook.com>"]
 
@@ -10,6 +10,7 @@ torch = "^1.2"
 torchvision = "^0.4.0"
 visdom = "^0.1.8"
 tqdm = "^4.33"
+pycodestyle = "^2.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.1"

@@ -1,11 +1,10 @@
 import pytest
 import torch
-import torchvision
-from torch import nn
 import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torch import nn
 from torch.utils.data.dataloader import DataLoader
 from torchvision.datasets import FakeData
-import torchvision.transforms as transforms
 
 
 @pytest.fixture
@@ -26,7 +25,8 @@ def fake_loader():
     transform = transforms.Compose(
         [transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    return DataLoader(FakeData(size=20, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4, shuffle=True,
+    return DataLoader(FakeData(size=20, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4,
+                      shuffle=True,
                       num_workers=1)
 
 

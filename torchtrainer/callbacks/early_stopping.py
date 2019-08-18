@@ -27,7 +27,7 @@ class EarlyStoppingEpoch(Callback):
     def on_epoch_end(self, epoch, logs=None):
         current_loss = logs.get(self.monitor)
         self.history.append(current_loss)
-        self.history[-self.patience:]
+        self.history = self.history[-self.patience:]
 
         if current_loss is None:
             pass
@@ -75,7 +75,7 @@ class EarlyStoppingIteration(Callback):
         current_loss = logs.get(self.monitor)
         self.iteration += 1
         self.history.append(current_loss)
-        self.history[-self.patience:]
+        self.history = self.history[-self.patience:]
 
         if current_loss is None:
             pass

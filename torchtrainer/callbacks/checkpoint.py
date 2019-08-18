@@ -105,4 +105,3 @@ class CheckpointIteration(Callback):
         for f in glob.glob(snapshot_prefix + '*'):
             if f != snapshot_path:
                 os.remove(f)
-

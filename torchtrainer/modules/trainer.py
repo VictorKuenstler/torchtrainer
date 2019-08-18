@@ -46,8 +46,8 @@ class TorchTrainer:
         :param loss: Loss funciton of your choice
         :param train_loader: L
         :param val_loader:
-        :param transform_fn: Function to transform batch into (*inputs, y_true) where inputs is tuple of inputs passed or
-        (input_tensor, y_true)
+        :param transform_fn: Function to transform batch into (*inputs, y_true) where inputs is tuple of inputs passed
+        or (input_tensor, y_true)
         into your forward pass
         :param callbacks: List of callbacks
         :param metrics: List of metrics to log
