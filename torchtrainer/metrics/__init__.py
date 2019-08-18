@@ -1,1 +1,1 @@
-from torchtrainer.metrics.binary_accuracy import *
+from torchtrainer.metrics.binary_accuracy import BinaryAccuracy
