@@ -7,6 +7,7 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - pycodestyle --statistics tests --show-source --max-line-length=120
-  - pycodestyle --statistics torchtrainer --show-source --max-line-length=120
+  - pycodestyle  --cov-report term --cov=torchtrainer --max-line-length=120
   - pytest
+after_success:
+  - codecov

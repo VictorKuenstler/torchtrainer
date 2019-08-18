@@ -8,11 +8,21 @@ from torchtrainer.callbacks.callbacks import Callback
 
 
 class Checkpoint(Callback):
+    """
+    Checkpointing after each iteration. Additionally saves the current best model in seperate file
+    """
     def __init__(self, directory, filename='snapshot', best_filename='best', monitor='val_loss'):
+        """
+
+        :param directory: directory to save checkpoints ins
+        :param filename: prefix for snapshots
+        :param best_filename: filename for best model
+        :param monitor: value to compare models
+        """
         self.directory = directory
         self.filename = filename
         self.monitor = monitor
-        self.best_filename = best_filename
+        self.best_filename = best_filename + '.pt'
         self.best = float('inf')
 
         super(Checkpoint, self).__init__()
@@ -59,9 +69,16 @@ class Checkpoint(Callback):
 
 class CheckpointIteration(Callback):
     def __init__(self, directory, filename='snapshot', best_filename='best', monitor='val_loss'):
+        """
+
+        :param directory: directory to save checkpoints ins
+        :param filename: prefix for snapshots
+        :param best_filename: filename for best model
+        :param monitor: value to compare models
+        """
         self.directory = directory
         self.filename = filename
-        self.best_filename = best_filename
+        self.best_filename = best_filename + '.pt'
         self.monitor = monitor
         self.best = float('inf')
 

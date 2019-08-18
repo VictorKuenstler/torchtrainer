@@ -4,8 +4,16 @@ from torchtrainer.callbacks.callbacks import Callback
 
 
 class CSVLogger(Callback):
+    """
+    Log after every epoch
+    """
+
     def __init__(self,
                  file):
+        """
+        Init
+        :param file: path to log file
+        """
         super(CSVLogger, self).__init__()
         self.file = file
         self.columns = None
@@ -33,8 +41,16 @@ class CSVLogger(Callback):
 
 
 class CSVLoggerIteration(CSVLogger):
+    """
+    Log every time validation is run if you set up validate_every on your trainer
+    """
+
     def __init__(self,
                  file):
+        """
+        Init
+        :param file: path to log file
+        """
         super(CSVLoggerIteration, self).__init__(file)
 
     def on_epoch_end(self, epoch, logs=None):

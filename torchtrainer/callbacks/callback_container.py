@@ -3,7 +3,7 @@ from torchtrainer.utils import current_time
 
 class CallbackContainer:
     """
-    Container holding all the callbacks
+    Container to hold and call all callbacks
     """
 
     def __init__(self, callbacks=None, trainer=None):

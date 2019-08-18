@@ -2,6 +2,9 @@ from torchtrainer.metrics.metric import Metric
 
 
 class BinaryAccuracy(Metric):
+    """
+    Binary Running Accuracy Metric
+    """
     def __init__(self):
         self.name = 'binary_acc'
 

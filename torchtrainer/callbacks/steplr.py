@@ -6,6 +6,12 @@ from torchtrainer.callbacks.callbacks import Callback
 
 class StepLREpochCallback(Callback):
     def __init__(self, step_size=30, gamma=0.1, on_iteration_every=None):
+        """
+
+        :param step_size: StepLR parameter
+        :param gamma: StepLR parameter
+        :param on_iteration_every: Whether to call it after every X batches if None it is called after every epoch
+        """
         super(StepLREpochCallback, self).__init__()
         self.scheduler = None
         self.step_size = step_size

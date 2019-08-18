@@ -18,7 +18,14 @@ def convert_logs(logs):
 
 
 class ProgressBar(Callback):
+    """
+    TQDM progress bar for training and validating
+    """
     def __init__(self, log_every=100):
+        """
+
+        :param log_every: Number of iterations between writing log to console
+        """
         self.training_bar = None
         self.validation_bar = None
         self.has_header = False

@@ -1,6 +1,6 @@
 class Callback(object):
     """
-    Abstract base class used to build new callbacks.
+    Abstract Base Callback Class
     """
 
     def __init__(self):

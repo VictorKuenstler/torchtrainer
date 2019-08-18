@@ -4,7 +4,16 @@ from torchtrainer.callbacks.callbacks import Callback
 
 
 class ReduceLROnPlateauCallback(Callback):
+    """
+    ReduceLROnPlateu Callback
+    """
     def __init__(self, on_iteration_every=None, monitor='running_loss', **kwargs):
+        """
+
+        :param on_iteration_every: Whether to call it after every X batches if None it is called after every epoch
+        :param monitor: Monitor to compare on
+        :param kwargs: Parameters passed to torch.optim.lr_scheduler.ReduceLROnPlateau
+        """
         self.scheduler = None
         super(ReduceLROnPlateauCallback, self).__init__()
         self.args = kwargs
