@@ -8,3 +8,5 @@ torchtrainer/__pycache__/
 torchtrainer/callbacks/__pycache__/
 
 *.pyc
+
+dist/
