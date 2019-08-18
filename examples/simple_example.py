@@ -1,36 +1,10 @@
-# torchtrainer
-
-
-PyTorch model training made simpler. Focus on optimizing your model! Concepts are heavily inspired by the awesome project [torchsample](https://github.com/ncullen93/torchsample). 
-
-[![Build Status](https://travis-ci.com/VictorKuenstler/torchtrainer.svg?branch=master)](https://travis-ci.com/VictorKuenstler/torchtrainer)
-[![codecov](https://codecov.io/gh/VictorKuenstler/torchtrainer/branch/master/graph/badge.svg)](https://codecov.io/gh/VictorKuenstler/torchtrainer)
-
-## Features
-
-* `Torchtrainer`
-* Logging utilities
-* Metrics
-* Visdom Visualization
-* Learning Rate Scheduler
-* Checkpointing
-* Flexible for muliple data inputs
-* Setup validation after every ... batches
-
-## Usage
-
-### Installation
-
-```bash
-pip install torchtrainer
-```
-
-
-### Example
-
-```python
 from torch import nn
 from torch.optim import SGD
+from torch.utils.data.dataloader import DataLoader
+from torchvision import transforms
+from torchvision.datasets import FakeData
+
+from tests.fixtures import Net
 from torchtrainer.callbacks.checkpoint import Checkpoint
 from torchtrainer.callbacks.csv_logger import CSVLogger
 from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch
@@ -48,14 +22,25 @@ def transform_fn(batch):
 
 metrics = [BinaryAccuracy()]
 
-train_loader = ...
-val_loader = ...
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+data_loader = DataLoader(FakeData(size=100, image_size=(3, 32, 32), num_classes=2, transform=transform),
+                         batch_size=4,
+                         shuffle=True,
+                         num_workers=1)
+train_loader = DataLoader(FakeData(size=100, image_size=(3, 32, 32), num_classes=2, transform=transform),
+                          batch_size=4,
+                          shuffle=True,
+                          num_workers=1)
+val_loader = DataLoader(FakeData(size=50, image_size=(3, 32, 32), num_classes=2, transform=transform), batch_size=4,
+                        shuffle=True,
+                        num_workers=1)
 
-model = ...
+model = Net()
 loss = nn.BCELoss()
 optimizer = SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-# Setup Visdom Environment for your modl
 plotter = VisdomLinePlotter(env_name=f'Model {11}')
 
 callbacks = [
@@ -77,15 +62,6 @@ trainer.prepare(optimizer,
                 callbacks=callbacks,
                 metrics=metrics)
 
-# train your model
-trainer.train(epochs=10, batch_size=10)
-``` 
-
-## TODO
-
-- more tests
-- metrics
-
-
-## 
-
+epochs = 10
+batch_size = 10
+trainer.train(epochs, batch_size)

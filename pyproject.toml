@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "torchtrainer"
-version = "0.1"
-description = ""
+version = "0.2"
+description = "Focus on building and optimizing pytorch models not on training loops"
 authors = ["Victor Künstler <victor.kuenstler@outlook.com>"]
+readme = "README.md"
+homepage = "https://github.com/VictorKuenstler/torchtrainer"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.6"
