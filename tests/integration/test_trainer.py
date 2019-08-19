@@ -124,7 +124,6 @@ def test_trainer_train_steplr(fake_loader, simple_neural_net):
     loss = nn.BCELoss()
     optimizer = SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-
     callbacks = [
         StepLREpochCallback()
     ]
