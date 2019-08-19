@@ -57,7 +57,7 @@ callbacks = [
     ProgressBar(log_every=10),
     VisdomEpoch(plotter, on_iteration_every=10),
     VisdomEpoch(plotter, on_iteration_every=10, monitor='binary_acc'),
-    CSVLogger('test.log'),
+    CSVLogger('test.csv'),
     Checkpoint('./model'),
     EarlyStoppingEpoch(min_delta=0.1, monitor='val_running_loss', patience=10),
     ReduceLROnPlateauCallback(factor=0.1, threshold=0.1, patience=2, verbose=True)
