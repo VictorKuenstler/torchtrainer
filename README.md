@@ -1,7 +1,8 @@
 # torchtrainer
 
 
-PyTorch model training made simpler. Focus on optimizing your model! Concepts are heavily inspired by the awesome project [torchsample](https://github.com/ncullen93/torchsample) and [Keras](https://github.com/keras-team/keras). 
+PyTorch model training made simpler without loosing control. Focus on optimizing your model! Concepts are heavily inspired by the awesome project [torchsample](https://github.com/ncullen93/torchsample) and [Keras](https://github.com/keras-team/keras).
+Further, besides applying Epoch Callbacks it also allows to call Callbacks every time after a specific number of batches passed (iterations) for long epoch durations.
 
 [![Build Status](https://travis-ci.com/VictorKuenstler/torchtrainer.svg?branch=master)](https://travis-ci.com/VictorKuenstler/torchtrainer)
 [![codecov](https://codecov.io/gh/VictorKuenstler/torchtrainer/branch/master/graph/badge.svg)](https://codecov.io/gh/VictorKuenstler/torchtrainer)
@@ -31,19 +32,10 @@ pip install torchtrainer
 ```python
 from torch import nn
 from torch.optim import SGD
-from torchtrainer.callbacks.checkpoint import Checkpoint
-from torchtrainer.callbacks.csv_logger import CSVLogger
-from torchtrainer.callbacks.early_stopping import EarlyStoppingEpoch
-from torchtrainer.callbacks.progressbar import ProgressBar
-from torchtrainer.callbacks.reducelronplateau import ReduceLROnPlateauCallback
-from torchtrainer.callbacks.visdom import VisdomLinePlotter, VisdomEpoch
-from torchtrainer.metrics.binary_accuracy import BinaryAccuracy
-from torchtrainer.trainer import TorchTrainer
-
-
-def transform_fn(batch):
-    inputs, y_true = batch
-    return inputs, y_true.float()
+from torchtrainer import TorchTrainer
+from torchtrainer.callbacks import VisdomLinePlotter, ProgressBar, VisdomEpoch, Checkpoint, CSVLogger, \
+    EarlyStoppingEpoch, ReduceLROnPlateauCallback
+from torchtrainer.metrics import BinaryAccuracy
 
 
 metrics = [BinaryAccuracy()]
@@ -58,6 +50,9 @@ optimizer = SGD(model.parameters(), lr=0.001, momentum=0.9)
 # Setup Visdom Environment for your modl
 plotter = VisdomLinePlotter(env_name=f'Model {11}')
 
+
+# Setup the callbacks of your choice
+
 callbacks = [
     ProgressBar(log_every=10),
     VisdomEpoch(plotter, on_iteration_every=10),
@@ -69,6 +64,14 @@ callbacks = [
 ]
 
 trainer = TorchTrainer(model)
+
+# function to transform batch into inputs to your model and y_true values
+# if your model accepts multiple inputs, just put all inputs into a tuple (input1, input2), y_true
+def transform_fn(batch):
+    inputs, y_true = batch
+    return inputs, y_true.float()
+
+# prepare your trainer for training
 trainer.prepare(optimizer,
                 loss,
                 train_loader,
@@ -78,8 +81,41 @@ trainer.prepare(optimizer,
                 metrics=metrics)
 
 # train your model
-trainer.train(epochs=10, batch_size=10)
+result = trainer.train(epochs=10, batch_size=10)
+
 ``` 
+
+
+### Callbacks
+
+#### Logger
+
+* `CSVLogger`
+* `CSVLoggerIteration`
+* `ProgressBar`
+
+#### Visualization and Logging
+
+* `VisdomEpoch`
+
+#### Optimizers
+
+* `ReduceLROnPlateauCallback`
+* `StepLRCallback`
+
+#### Regularization
+
+* `EarlyStoppingEpoch`
+* `EarlyStoppingIteration`
+
+#### Checkpointing
+
+* `Checkpoint`
+* `CheckpointIteration`
+
+### Metrics
+
+Currently only `BinaryAccuracy` is implemented. To implement other Metrics use the abstract base metric class `torchtrainer.metrics.metric.Metric`. 
 
 ## TODO
 
