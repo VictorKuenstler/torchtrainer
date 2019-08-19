@@ -203,6 +203,9 @@ class TorchTrainer:
             out_val_logs['val_' + key] = item
 
         container.on_validation_end(out_val_logs)
+
+        # get back to train mode
+        self.model.train()
         return out_val_logs
 
     def _set_loss(self, loss):
