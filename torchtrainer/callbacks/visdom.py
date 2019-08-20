@@ -31,6 +31,34 @@ class VisdomEpoch(Callback):
                                   label='Iterations')
 
 
+class VisdomIteration(Callback):
+    def __init__(self, visdom_plotter, monitor='running_loss', on_iteration_every=100):
+        """
+        Plot your metrics on epoch end
+        :param visdom_plotter: for example VisdomLinePlotter(env_name=f'Model {session_name}')
+        :param monitor: the metric to plot (loss, running_loss)
+        """
+        super(VisdomEpoch, self).__init__()
+        self.plotter = visdom_plotter
+        self.monitor = monitor
+        self.on_iteration_every = on_iteration_every
+        self.iterations = 0
+
+    def on_iteration(self, iteration, logs=None):
+        if logs is not None:
+            self.plotter.plot(self.monitor, 'train', self.monitor, iteration, logs[self.monitor], label='iteration')
+            self.plotter.plot(self.monitor, 'val', self.monitor, iteration, logs['val_' + self.monitor],
+                              label='iteration')
+
+    def on_batch_end(self, iteration, logs=None):
+        self.iterations += 1
+        if self.iterations % self.on_iteration_every == 0:
+            if logs is not None:
+                self.plotter.plot(var_name=self.monitor + 'iteration', split_name='train',
+                                  title_name=f'Iteration: {self.monitor}', x=self.iterations, y=logs[self.monitor],
+                                  label='Iterations')
+
+
 class VisdomLinePlotter:
     def __init__(self, env_name='model'):
         self.viz = Visdom()
