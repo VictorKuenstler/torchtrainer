@@ -5,4 +5,4 @@ from torchtrainer.callbacks.early_stopping import EarlyStoppingIteration, EarlyS
 from torchtrainer.callbacks.metric_callback import MetricCallback
 from torchtrainer.callbacks.progressbar import ProgressBar
 from torchtrainer.callbacks.reducelronplateau import ReduceLROnPlateauCallback
-from torchtrainer.callbacks.visdom import VisdomEpoch, VisdomLinePlotter
+from torchtrainer.callbacks.visdom import VisdomEpoch, VisdomLinePlotter, VisdomIteration

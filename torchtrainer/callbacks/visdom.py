@@ -38,7 +38,7 @@ class VisdomIteration(Callback):
         :param visdom_plotter: for example VisdomLinePlotter(env_name=f'Model {session_name}')
         :param monitor: the metric to plot (loss, running_loss)
         """
-        super(VisdomEpoch, self).__init__()
+        super(VisdomIteration, self).__init__()
         self.plotter = visdom_plotter
         self.monitor = monitor
         self.on_iteration_every = on_iteration_every
