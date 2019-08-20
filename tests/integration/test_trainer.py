@@ -101,7 +101,6 @@ def test_trainer_train_iteration(fake_loader, simple_neural_net):
     VisdomIteration(plotter, on_iteration_every=10, monitor='binary_acc'),
 
 
-
 def test_trainer_train_full(fake_loader, simple_neural_net):
     def transform_fn(batch):
         inputs, y_true = batch
