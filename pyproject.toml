@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchtrainer"
-version = "0.3.6"
+version = "0.3.8"
 description = "Focus on building and optimizing pytorch models not on training loops"
 authors = ["Victor Künstler <victor.kuenstler@outlook.com>"]
 readme = "README.md"

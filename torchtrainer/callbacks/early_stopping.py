@@ -32,11 +32,11 @@ class EarlyStoppingEpoch(Callback):
         if current_loss is None:
             pass
         else:
-            if (current_loss - self.best_loss) < -self.min_delta:
+            if abs(current_loss - self.best_loss) > self.min_delta:
                 self.best_loss = current_loss
                 self.wait = 1
             else:
-                if self.wait > self.patience:
+                if self.wait >= self.patience:
                     self.stopped_epoch = epoch + 1
                     self.trainer.stop_training = True
                 self.wait += 1
@@ -46,7 +46,7 @@ class EarlyStoppingEpoch(Callback):
             tqdm.write(
                 f'EarlyStopping terminated Training at Epoch {self.stopped_epoch} as {self.monitor} ' +
                 f'did not decrease by {self.min_delta} for over {self.patience} Epochs. ' +
-                f'History: {", ".join( ["{:.3f}".format(el) for el in self.history])}'
+                f'History: {", ".join(["{:.3f}".format(el) for el in self.history])}'
             )
 
 
@@ -80,11 +80,11 @@ class EarlyStoppingIteration(Callback):
         if current_loss is None:
             pass
         else:
-            if (current_loss - self.best_loss) < -self.min_delta:
+            if abs(current_loss - self.best_loss) > self.min_delta:
                 self.best_loss = current_loss
                 self.wait = 1
             else:
-                if self.wait > self.patience:
+                if self.wait > self.patience or self.best_loss not in self.history:
                     self.stopped_iteration = self.iteration + 1
                     self.trainer.stop_training = True
                 self.wait += 1
@@ -94,5 +94,5 @@ class EarlyStoppingIteration(Callback):
             tqdm.write(
                 f'EarlyStopping terminated Training at Epoch {self.stopped_iteration} as {self.monitor}' +
                 f'did not decrease by {self.min_delta} for over {self.patience} Epochs.' +
-                f'History: {", ".join( ["{:.3f}".format(el) for el in self.history])}'
+                f'History: {", ".join(["{:.3f}".format(el) for el in self.history])}'
             )
