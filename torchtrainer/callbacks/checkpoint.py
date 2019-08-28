@@ -28,11 +28,7 @@ class Checkpoint(Callback):
         super(Checkpoint, self).__init__()
 
     def save(self, epoch, file, is_best=False):
-        torch.save({
-            'epoch': epoch + 1,
-            'state_dict': self.trainer.model.state_dict(),
-            'optimizer': self.trainer._optimizer.state_dict()
-        }, file)
+        torch.save(self.trainer.model, file)
 
         if is_best:
             shutil.copyfile(file, file.replace(self.filename, self.best_filename))
@@ -85,11 +81,7 @@ class CheckpointIteration(Callback):
         super(CheckpointIteration, self).__init__()
 
     def save(self, iteration, file, is_best=False):
-        torch.save({
-            'iteration': iteration + 1,
-            'state_dict': self.trainer.model.state_dict(),
-            'optimizer': self.trainer._optimizer.state_dict()
-        }, file)
+        torch.save(self.trainer.model, file)
 
         if is_best:
             shutil.copyfile(file, file.replace(self.filename, self.best_filename))
